@@ -26,7 +26,7 @@ class SECCrawler():
 
         # create beautiful-soup object
         soup = BeautifulSoup(r.content)
-        table = soup.find('table', {'summary':'heding'})
+        table = soup.find('table')#, {'summary':'heding'})
         rows = table.findAll('tr')
         for tr in rows:
             if tr.text== 'NameSizeLast Modified\n':
