@@ -1,7 +1,6 @@
 azure==2.0.0
 requests==2.18.4
 wget==3.2
-bs4==0.0.1
 ckanapi==4.0
 BeautifulSoup==4.4.0
 tqdm==4.15.0
