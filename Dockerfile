@@ -13,4 +13,5 @@ RUN pip install -r requirements.txt
 
 RUN ["/bin/bash", "-c", "source arguments.env"]
 
-CMD ["/bin/bash", "-c","source arguments.env && python SECData.py"]
+#CMD ["/bin/bash", "-c","source arguments.env && python SECData.py"]
+CMD ["python", “SECData.py"]

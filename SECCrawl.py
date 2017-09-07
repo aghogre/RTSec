@@ -26,10 +26,11 @@ class SECCrawler():
 
         # create beautiful-soup object
         soup = BeautifulSoup(r.content)
-        table = soup.find('table')#, {'summary':'heding'})
+        table = soup.find('table', {'summary':'heding'})
         rows = table.findAll('tr')
         for tr in rows:
-            if tr.text== 'NameSizeLast Modified\n':
+            if tr.find("th", text="Name") or tr.find("th", text="Size") or tr.find("th", text="Last Modified\n"):
+            #if tr.text== 'NameSizeLast Modified\n':
                 continue 
             else:
                 cols = tr.findAll('td')
