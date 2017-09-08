@@ -10,7 +10,8 @@ import io
 import re
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
-from azure.storage.blob import BlockBlobService
+from azure.storage.blob import BlockBlobService, ContainerPermissions
+from datetime import datetime, timedelta
 
 
 class SEC_Azure():
@@ -61,6 +62,8 @@ class SEC_Azure():
 
     def downloadToAzure(self, cik, link_list):
         # Get all the doc
+        azure_urls=set()
+        
         file_types = set()
         for k in range(len(link_list)):
             original_url=''
@@ -80,19 +83,26 @@ class SEC_Azure():
                 
                 r = requests.get(xbrl_zip_file_url, stream=True)
                 stream = io.BytesIO(r.content)
-                                
+                
+                
                 #print("downloading zip " + xbrl_zip_file_url)
                 self.block_blob_service.create_blob_from_stream(self.azure_container+'/'+cik, 
                                                                 xbrl_zip_file_name, stream)
+                sas_token = self.block_blob_service.generate_blob_shared_access_signature(
+                self.azure_container,
+                cik + '/' + xbrl_zip_file_name,
+                expiry=datetime.utcnow() + timedelta(weeks=52),
+                permission=ContainerPermissions.READ)
+            
+                download_url = self.block_blob_service.make_blob_url(
+                            self.azure_container, cik + '/' + xbrl_zip_file_name,
+                            sas_token=sas_token)
+                azure_urls.add(download_url)
+                
             else:
                 pass
-                #print('No Xbrl files available')            
             
-            #for td in [tr.findAll('td') for tr in [tbl.findAll('tr') for tbl in table1]]:
-            
-            #urls = [tr.find('a', href=True) for tr in [tbl.findAll('tr') for tbl in table1]]
-            #for url in urls:
-                #original_url = url['href']
+             
                 
             for tbl in table1:                    
                 rows = tbl.findAll('tr')
@@ -104,6 +114,17 @@ class SEC_Azure():
                         
                         arc = "https://www.sec.gov"+original_url
                         #print(arc)
+                        sas_token = self.block_blob_service.generate_blob_shared_access_signature(
+                        self.azure_container,
+                        cik + '/' + original_url.split("/")[-1],
+                        expiry=datetime.utcnow() + timedelta(weeks=52),
+                        permission=ContainerPermissions.READ)
+                                
+                        download_url = self.block_blob_service.make_blob_url(
+                        self.azure_container, cik + '/' + original_url.split("/")[-1],
+                        sas_token=sas_token)
+                        azure_urls.add(download_url)
+
                         if(original_url.split("/")[-1] != ''):
                             if(original_url.split(".")[-1]=='pdf' or original_url.split(".")[-1]=='gif' 
                                or original_url.split(".")[-1]=='jpg'):
@@ -118,10 +139,14 @@ class SEC_Azure():
                                 self.block_blob_service.create_blob_from_text(self.azure_container+'/'+cik, 
                                                                               original_url.split("/")[-1], f.text)
                                 file_types.add(original_url.split(".")[-1])
-                                break                            
+                                break
                         else:
-                            pass 
+                                pass
+                            
+        
+                         
                             #print('No file Found for')
-        return file_types
+        
+        return file_types, azure_urls
     
     
