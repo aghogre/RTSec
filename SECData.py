@@ -26,7 +26,7 @@ def main():
     ckan_api_key = argument_config.get('ckan_key')
     years = argument_config.get('years')
 
-    years = map(int, years.replace("'","").split(','))
+    years = map(int, years.split(','))
     print(years)
 
     current_year = datetime.now().strftime("%Y")
