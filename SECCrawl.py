@@ -19,10 +19,7 @@ class SECCrawler():
     def __init__(self):
         #Setting path to  download a file 
         os.chdir(os.path.dirname(os.path.abspath('SECData.py')))
-        self.browser = Browser()
-        self.browser.addheaders = [('User-agent', 'Mozilla/5.0\
-            (Windows NT 6.2; WOW64) AppleWebKit/537.11 (KHTML, like Gecko)\
-            Chrome/23.0.1271.97 Safari/537.11')]
+       
 
     
     def get10kdata(self, year):
