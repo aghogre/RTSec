@@ -32,7 +32,7 @@ class SEC_CKAN():
             metadata_json = json.loads(json_data)
         json_file.close()
         
-        metadata = [mdata for mdata in metadata_json if mdata["cik"] == str(cik)]
+        metadata = [mdata for mdata in metadata_json["metadata"] if mdata["cik"] == str(cik)]
         if len(metadata) == 0:
             return
         else:

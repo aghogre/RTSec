@@ -9,7 +9,7 @@ import os
 import time
 import urllib2
 import json
-from azure.storage.blob import AppendBlobService, BlockBlobService
+from datetime import datetime
 from SECCrawl import SECCrawler
 from SECAzure import SEC_Azure
 from SECCKAN import SEC_CKAN
@@ -52,7 +52,7 @@ def main():
     secCKAN = SEC_CKAN(ckan_host, ckan_api_key)
     
     for count in range(0, len(years)):
-        store10kdata(years[count], cik_lists[count], secAzure, secCKAN, azure_account_name, azure_account_key, azure_container)
+        store10kdata(years[count], cik_lists[count], secAzure, secCKAN)
         
     print("10-K Data Downloaded into Azure & its metadata is available in CKAN.")
     print("Total time taken :: " + str(time.time() - t1))    
@@ -98,62 +98,37 @@ def makeMetadataJson(azure_container):
     ticker_file.close()
         
      
-def store10kdata(year, cik_list, secAzure, secCKAN, azure_account_name, azure_account_key, azure_container):
+def store10kdata(year, cik_list, secAzure, secCKAN):
     try:
         filename = "uploaded_data_"+year+".txt"
-        append_blob_service = AppendBlobService(account_name=azure_account_name, account_key=azure_account_key)
-        block_blob_service = BlockBlobService(account_name = azure_account_name, account_key = azure_account_key)
+        
         uploaded_ciks = ''
         uploaded_ciks_list = []
-        
-        generator = block_blob_service.list_blobs(azure_container)
-        
-        for blob in generator:
+        if os.path.exists(filename):
+            fr1 = open(filename, 'r')
+            uploaded_ciks = fr1.read()
+            fr1.close()
             
-            if (blob.name == filename):
-                
-                uploaded_ciks = append_blob_service.get_blob_to_text(azure_container, filename)
-               
-                for cik_list_copy in uploaded_ciks:
-                    uploaded_ciks_list.add(cik_list_copy)
-                append_blob_service.append_blob_from_text(azure_container, filename, uploaded_ciks + '\n')
-                
-                print("Among "+ str(len(cik_list)) + " files, " 
-                + str(len(uploaded_ciks_list)) + " are ignored.")
-                
-                for cik in cik_list[len(uploaded_ciks_list):] :
-                    print("Download started for cik -> " + str(cik[0]))
-                    
-                    azure_url, file_types = secAzure.createDocumentList(cik[0], year)
-                    
-                    secCKAN.storeMetadata(cik[0], azure_url, file_types, year)
-                                    
-                    append_blob_service.append_blob_from_text(azure_container, filename, cik[0] + '\n')
-        
-                    print("Download completed for cik -> " + str(cik[0]))
-                
-            else:
-                append_blob_service.create_blob(azure_container, filename)
-                
-                print("Among "+ str(len(cik_list)) + " files, " 
-                + str(len(uploaded_ciks_list)) + " are ignored.")
-                
-                for cik in cik_list[len(uploaded_ciks_list):] :
-                    print("Download started for cik -> " + str(cik[0]))
-                    
-                    azure_url, file_types = secAzure.createDocumentList(cik[0], year)
-                    
-                    secCKAN.storeMetadata(cik[0], azure_url, file_types, year)
-                                    
-                    append_blob_service.append_blob_from_text(azure_container, filename, cik[0] + '\n')
-        
-                    print("Download completed for cik -> " + str(cik[0]))
-                
+            fr2 = open(filename, 'r')
+            uploaded_ciks_list = map(str.strip, fr2)
+            fr2.close()
             
-    
+        with open(filename, 'w+') as fw:
+            fw.write(uploaded_ciks)
+            print("Among "+ str(len(cik_list)) + " files, " 
+                  + str(len(uploaded_ciks_list)) + " are ignored.")
             
-        
-        
+            for cik in cik_list[len(uploaded_ciks_list):] :
+                print("Download started for cik -> " + str(cik[0]))
+                
+                azure_url, file_types = secAzure.createDocumentList(cik[0], year)
+                
+                secCKAN.storeMetadata(cik[0], azure_url, file_types, year)
+                                
+                fw.write(cik[0] + '\n')
+
+                print("Download completed for cik -> " + str(cik[0]))                
+        fw.close()
     except:
         print ("No input file Found")
         raise
