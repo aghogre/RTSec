@@ -91,7 +91,7 @@ def makeMetadataJson(azure_container):
                 "Incorporated" : cik_data[7],
                 "Tags" : "SEC, "+cik_data[3]+","+cik_data[4]+","+cik_data[2]
             }) 
-        print(i)                       
+                              
         if len(resp_json['list']) < 100:
             break
         i += 100
