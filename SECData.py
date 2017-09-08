@@ -9,11 +9,12 @@ import os
 import time
 import urllib2
 import json
+from config import argument_config
 from datetime import datetime
 from SECCrawl import SECCrawler
 from SECAzure import SEC_Azure
 from SECCKAN import SEC_CKAN
-from config import argument_config
+from azure.storage.blob import AppendBlobService, BlockBlobService
 
 
 def main():
@@ -24,27 +25,29 @@ def main():
     ckan_host = argument_config.get('ckan_host')
     ckan_api_key = argument_config.get('ckan_key')
     years = argument_config.get('years')
-    
-    years = map(str, years)
-    if len(years)==1:
-        years = map(str.strip, years[0].split(','))
+
+    years = map(int, years.replace("'","").split(','))
     print(years)
+
+    current_year = datetime.now().strftime("%Y")
     
+    for year in years:
+        if int(year) not in range(1993, int(current_year)): 
+            print("discarding " + str(year))
+            years.remove(year)
+
     t1 = time.time()
     
     # Crawling the www.sec.gov to fetch the CIKs filed 10-K filings with SEC in the givens years.
     secCrawler = SECCrawler()    
     cik_lists = []
-    
+
     for year in years:
-        print(year)
-        if int(year) not in range(1993, 2017): 
-            print("discarding " + year)
-            years.remove(year)
-        cik_list = secCrawler.get10kdata(year)
-        cik_lists.append(cik_list)
+        print("Year ---->> " + str(year))        
+        cik_list = secCrawler.get10kdata(str(year))
+        cik_lists.append(cik_list.values.tolist()) 
     
-    if '2017' in years or os.path.exists("metadata.json") == False:
+    if str(current_year) in years or os.path.exists("ticker_metadata.json") == False:
         makeMetadataJson(azure_container)
         
     # Storing the 10-K complete data for each CIK in Azure.
@@ -52,9 +55,10 @@ def main():
     secCKAN = SEC_CKAN(ckan_host, ckan_api_key)
     
     for count in range(0, len(years)):
-        store10kdata(years[count], cik_lists[count], secAzure, secCKAN)
+        store10kdata(str(years[count]), cik_lists[count], secAzure, secCKAN, 
+                     azure_account_name, azure_account_key, azure_container)
         
-    print("10-K Data Downloaded into Azure & its metadata is available in CKAN.")
+    print("10-K Data for given years is downloaded into Azure & its metadata is available in CKAN.")
     print("Total time taken :: " + str(time.time() - t1))    
     
     
@@ -92,49 +96,60 @@ def makeMetadataJson(azure_container):
             break
         i += 100
             
-    with open("metadata.json", "w") as ticker_file:
+    with open("ticker_metadata.json", "w") as ticker_file:
         json.dump(metadata, ticker_file)
- #       ticker_file.write(str(metadata))
+ 
     ticker_file.close()
         
      
-def store10kdata(year, cik_list, secAzure, secCKAN):
+def store10kdata(year, cik_list, secAzure, secCKAN, azure_account_name, azure_account_key, azure_container):
+        
     try:
+        count=0
         filename = "uploaded_data_"+year+".txt"
         
-        uploaded_ciks = ''
-        uploaded_ciks_list = []
-        if os.path.exists(filename):
-            fr1 = open(filename, 'r')
-            uploaded_ciks = fr1.read()
-            fr1.close()
-            
-            fr2 = open(filename, 'r')
-            uploaded_ciks_list = map(str.strip, fr2)
-            fr2.close()
-            
-        with open(filename, 'w+') as fw:
-            fw.write(uploaded_ciks)
-            print("Among "+ str(len(cik_list)) + " files, " 
-                  + str(len(uploaded_ciks_list)) + " are ignored.")
-            
-            for cik in cik_list[len(uploaded_ciks_list):] :
-                print("Download started for cik -> " + str(cik[0]))
-                
-                azure_url, file_types = secAzure.createDocumentList(cik[0], year)
-                
-                secCKAN.storeMetadata(cik[0], azure_url, file_types, year)
-                                
-                fw.write(cik[0] + '\n')
+        append_blob_service = AppendBlobService(account_name=azure_account_name, account_key=azure_account_key)
+        block_blob_service = BlockBlobService(account_name = azure_account_name, account_key = azure_account_key)
 
-                print("Download completed for cik -> " + str(cik[0]))                
-        fw.close()
+        uploaded_ciks_list = []
+        
+        generator = block_blob_service.list_blobs(azure_container)
+        
+        for blob in generator:
+            if blob.name == filename:
+                block_blob_service.get_blob_to_path(azure_container, filename, filename)
+               
+                fr2 = open(filename, 'r')
+                uploaded_ciks_list = map(str.strip, fr2)
+                fr2.close()
+               
+                count += 1
+                break
+            
+        if count == 0 :   
+            append_blob_service.create_blob(azure_container, filename)
+        
+        print("Among "+ str(len(cik_list)) + " files, " + str(len(uploaded_ciks_list)) + " are ignored.")
+            
+        for cik in cik_list[len(uploaded_ciks_list):] :
+            print("Download started for cik -> " + str(cik[0]))
+            
+            azure_url, file_types = secAzure.createDocumentList(cik[0], year)
+            file_types = ",".join(list(file_types))
+            
+            secCKAN.storeMetadata(cik[0], azure_url, file_types, year)
+                            
+            append_blob_service.append_blob_from_text(azure_container, filename, cik[0]+'\n')
+
+            print("Download completed for cik -> " + str(cik[0]))
     except:
         print ("No input file Found")
         raise
     
+
     
 if __name__ == '__main__':
     main()
+
 
 

@@ -12,14 +12,15 @@ from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from azure.storage.blob import BlockBlobService, ContainerPermissions
 from datetime import datetime, timedelta
+from os import path
 
 
 class SEC_Azure():
 
     def __init__(self, azure_account_name, azure_account_key, azure_container):
         self.azure_container = azure_container
-        self.block_blob_service = BlockBlobService(account_name = azure_account_name, 
-                                                   account_key = azure_account_key)
+        self.block_blob_service = BlockBlobService(account_name=azure_account_name, 
+                                                   account_key=azure_account_key)
         # creating azure container, iff container doesn't exist.
         if not self.block_blob_service.exists(self.azure_container):
             self.block_blob_service.create_container(self.azure_container)
@@ -55,56 +56,47 @@ class SEC_Azure():
                     url += "l"
                 link_list.append(url)
         
-        file_types = self.downloadToAzure(cik, link_list)
-        download_url = self.block_blob_service.make_blob_url(self.azure_container, str(cik))
-        return download_url, file_types 
+        azure_urls, file_types = self.downloadToAzure(cik, link_list)
+        
+        return azure_urls, file_types 
     
 
     def downloadToAzure(self, cik, link_list):
         # Get all the doc
         azure_urls=set()
-        
         file_types = set()
+        
         for k in range(len(link_list)):
             original_url=''
             try:
                 soup1 = BeautifulSoup(urlopen(link_list[k]))
             except:
                 continue
+            
             tablecheck = soup1.findAll("table",{"class":"tableFile"})
             table1 = soup1.findAll("table",{"class":"tableFile",
                                             "summary":"Document Format Files"})
             
             if(len(tablecheck)==2):
-                required_xbrl_url = link_list[k].replace('-index.html', '') 
-                xbrl_zip_file_url = required_xbrl_url + "-xbrl.zip"
+                xbrl_zip_file_url = link_list[k].replace('-index.html', '') + "-xbrl.zip"
                 xbrl_zip_file_name = xbrl_zip_file_url.split("/")[-1]
-                file_types.add(xbrl_zip_file_url.split(".")[-1])   
                 
                 r = requests.get(xbrl_zip_file_url, stream=True)
                 stream = io.BytesIO(r.content)
-                
-                
-                #print("downloading zip " + xbrl_zip_file_url)
-                self.block_blob_service.create_blob_from_stream(self.azure_container+'/'+cik, 
-                                                                xbrl_zip_file_name, stream)
+
+                self.block_blob_service.create_blob_from_stream(path.join(self.azure_container, cik), 
+                                                                xbrl_zip_file_name, stream)            
                 sas_token = self.block_blob_service.generate_blob_shared_access_signature(
-                self.azure_container,
-                cik + '/' + xbrl_zip_file_name,
-                expiry=datetime.utcnow() + timedelta(weeks=52),
-                permission=ContainerPermissions.READ)
+                                                self.azure_container,
+                                                path.join(cik, xbrl_zip_file_name),
+                                                expiry=datetime.utcnow() + timedelta(weeks=52),
+                                                permission=ContainerPermissions.READ)
             
-                
-               
-                download_url = self.block_blob_service.make_blob_url(
-                            self.azure_container, cik + '/' + xbrl_zip_file_name,
-                            sas_token=sas_token)
+                download_url = self.block_blob_service.make_blob_url(self.azure_container, 
+                                                path.join(cik, xbrl_zip_file_name),
+                                                sas_token=sas_token)
                 azure_urls.add(download_url)
-                
-            else:
-                pass
-            
-             
+                file_types.add(xbrl_zip_file_url.split(".")[-1])   
                 
             for tbl in table1:                    
                 rows = tbl.findAll('tr')
@@ -115,42 +107,38 @@ class SEC_Azure():
                         original_url = url['href']
                         
                         arc = "https://www.sec.gov"+original_url
-                        #print(arc)
-                        sas_token = self.block_blob_service.generate_blob_shared_access_signature(
-                        self.azure_container,
-                        cik + '/' + original_url.split("/")[-1],
-                        expiry=datetime.utcnow() + timedelta(weeks=52),
-                        permission=ContainerPermissions.READ)
-                        
-                     
-                        
-                        download_url = self.block_blob_service.make_blob_url(
-                        self.azure_container, cik + '/' + original_url.split("/")[-1],
-                        sas_token=sas_token)
-                        azure_urls.add(download_url)
+                            
+                        file_name = original_url.split("/")[-1]
+                        file_type = original_url.split(".")[-1]
 
-                        if(original_url.split("/")[-1] != ''):
-                            if(original_url.split(".")[-1]=='pdf' or original_url.split(".")[-1]=='gif' 
-                               or original_url.split(".")[-1]=='jpg'):
+                        sas_token = self.block_blob_service.generate_blob_shared_access_signature(
+                                                self.azure_container,
+                                                path.join(cik, file_name),
+                                                expiry=datetime.utcnow() + timedelta(weeks=52),
+                                                permission=ContainerPermissions.READ)
+                                
+                        download_url = self.block_blob_service.make_blob_url(self.azure_container, 
+                                                path.join(cik, file_name),
+                                                sas_token=sas_token)
+                        azure_urls.add(download_url)
+                        
+                        if(file_name != ''):
+                            if(file_type=='pdf' or file_type=='gif' or file_type=='jpg'): 
                                 r = requests.get(arc, stream=True)
                                 stream = io.BytesIO(r.content)
-                                self.block_blob_service.create_blob_from_stream(self.azure_container+'/'+cik, 
-                                                                                original_url.split("/")[-1], stream)
-                                file_types.add(original_url.split(".")[-1])                          
-                                break
+                                self.block_blob_service.create_blob_from_stream(
+                                                path.join(self.azure_container, cik), 
+                                                file_name, stream)
                             else:  
                                 f = requests.get(arc)
-                                self.block_blob_service.create_blob_from_text(self.azure_container+'/'+cik, 
-                                                                              original_url.split("/")[-1], f.text)
-                                file_types.add(original_url.split(".")[-1])
-                                break
-                        else:
-                                pass
-                            
+                                self.block_blob_service.create_blob_from_text(
+                                                path.join(self.azure_container, cik), 
+                                                file_name, f.text)
+
+                            file_types.add(file_type)
+                            break
         
-                         
-                            #print('No file Found for')
-        
-        return file_types, azure_urls
+        return azure_urls, file_types 
+
     
     
