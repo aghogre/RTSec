@@ -94,6 +94,8 @@ class SEC_Azure():
                 expiry=datetime.utcnow() + timedelta(weeks=52),
                 permission=ContainerPermissions.READ)
             
+                
+               
                 download_url = self.block_blob_service.make_blob_url(
                             self.azure_container, cik + '/' + xbrl_zip_file_name,
                             sas_token=sas_token)
@@ -119,7 +121,9 @@ class SEC_Azure():
                         cik + '/' + original_url.split("/")[-1],
                         expiry=datetime.utcnow() + timedelta(weeks=52),
                         permission=ContainerPermissions.READ)
-                                
+                        
+                     
+                        
                         download_url = self.block_blob_service.make_blob_url(
                         self.azure_container, cik + '/' + original_url.split("/")[-1],
                         sas_token=sas_token)
