@@ -10,7 +10,7 @@ import os
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from mechanize import Browser
+
 
 
 
