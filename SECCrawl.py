@@ -5,6 +5,7 @@ Created on Thu Aug 31 12:53:18 2017
 @author: ADMIN
 """
 
+import logging
 import re
 import os
 import requests
@@ -12,16 +13,15 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 
-
-
 class SECCrawler():
 
     def __init__(self):
-        #Setting path to  download a file 
-        os.chdir(os.path.dirname(os.path.abspath('SECData.py')))
-       
-
+        logging.basicConfig(format='%(asctime)s %(levelname)s %(module)s.%(funcName)s %(message)s', level=logging.INFO)
+        # Setting path to download a file 
+        #os.chdir(os.path.dirname(os.path.abspath('SECData.py')))
+        
     
+    # Srape and extract the companies having filed 10-K under www.sec.gov
     def get10kdata(self, year):
         df = []
         archive_url = "https://www.sec.gov/Archives/edgar/full-index/"+year+"/"
@@ -29,11 +29,11 @@ class SECCrawler():
         r = requests.get(archive_url) 
         soup = BeautifulSoup(r.content, "html.parser")
        
+        logging.info("Extracting CIKs filed 10-K during "+year)
         for n in range(1,5):
             qtr = "QTR"+str(n)+"/"
             if soup.find("a", {"href" : qtr}):
                 url ="https://www.sec.gov/Archives/edgar/full-index/"+year+"/"+qtr+"/company.idx"
-                print "URL -->> ",url
                 company_index = pd.read_table(url, header=None, 
                                               skiprows=[0,1,2,3,4,5], engine='python')
                 idx_list = company_index.values.tolist()
@@ -53,14 +53,15 @@ class SECCrawler():
                     if record_elements[col_10k] =='10-K':
                         data_list.append(record_elements)
                 
+                # converting the list to a dataframe
                 df.append(pd.DataFrame(data_list, columns=col_heads))
-                print("length("+qtr+") -- " + str(len(df[n-1])))
+                logging.info("CIKs filed in "+qtr.replace("/","")+" are " + str(len(df[n-1])))
                 
+        # Collecting dataframes of all quarters put together.
         df_all = pd.concat([df[part] for part in range(0,len(df))])
         cik_list = df_all[['CIK']]
             
-        print("Total ciks for "+year+" are " + str(len(cik_list)))
-       # return cik_list.values.tolist()
+        logging.info("Total CIKs for "+year+" are " + str(len(cik_list)))
         return cik_list
     
     

@@ -18,6 +18,7 @@ from os import path
 class SEC_Azure():
 
     def __init__(self, azure_account_name, azure_account_key, azure_container):
+        # initializing class variables
         self.azure_container = azure_container
         self.block_blob_service = BlockBlobService(account_name=azure_account_name, 
                                                    account_key=azure_account_key)
@@ -48,13 +49,14 @@ class SEC_Azure():
         for year_str in year_link_string:
             if arg in year_str:
                 i = year_link_string.index(year_str)
-                link = year_link_string[i+1]
-                url =  re.split('[< >]', link)[2]
+                if len(year_link_string) > i+1:
+                    link = year_link_string[i+1]
+                    url =  re.split('[< >]', link)[2]
 
-                # If the link is .htm, convert it to .html
-                if url.split(".")[len(url.split("."))-1] == "htm":
-                    url += "l"
-                link_list.append(url)
+                    # If the link is .htm, convert it to .html
+                    if url.split(".")[len(url.split("."))-1] == "htm":
+                        url += "l"
+                    link_list.append(url)
         
         azure_urls, file_types = self.downloadToAzure(cik, link_list)
         
@@ -110,17 +112,6 @@ class SEC_Azure():
                             
                         file_name = original_url.split("/")[-1]
                         file_type = original_url.split(".")[-1]
-
-                        sas_token = self.block_blob_service.generate_blob_shared_access_signature(
-                                                self.azure_container,
-                                                path.join(cik, file_name),
-                                                expiry=datetime.utcnow() + timedelta(weeks=52),
-                                                permission=ContainerPermissions.READ)
-                                
-                        download_url = self.block_blob_service.make_blob_url(self.azure_container, 
-                                                path.join(cik, file_name),
-                                                sas_token=sas_token)
-                        azure_urls.add(download_url)
                         
                         if(file_name != ''):
                             if(file_type=='pdf' or file_type=='gif' or file_type=='jpg'): 
@@ -135,6 +126,17 @@ class SEC_Azure():
                                                 path.join(self.azure_container, cik), 
                                                 file_name, f.text)
 
+
+                            sas_token = self.block_blob_service.generate_blob_shared_access_signature(
+                                                    self.azure_container,
+                                                    path.join(cik, file_name),
+                                                    expiry=datetime.utcnow() + timedelta(weeks=52),
+                                                    permission=ContainerPermissions.READ)
+                                    
+                            download_url = self.block_blob_service.make_blob_url(self.azure_container, 
+                                                    path.join(cik, file_name),
+                                                    sas_token=sas_token)
+                            azure_urls.add(download_url)
                             file_types.add(file_type)
                             break
         
