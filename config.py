@@ -15,6 +15,6 @@ argument_config = {
 	'azure_container': os.getenv('CONTAINER','anshul'),
     'ckan_host': os.getenv('CKAN_HOST', 'http://40.71.214.191:80'),
     'ckan_key': os.getenv('CKAN_KEY', '3474fcd0-2ebc-4036-a60a-8bf77eea161f'),
-    'years': os.getenv('YEARS', '1993,1994'),
+    'years': os.getenv('YEARS', ['1993,1994']),
     'publisher': os.getenv('PUBLISHER', 'Random Trees')
 }
