@@ -39,7 +39,7 @@ def main():
     current_year = datetime.now().strftime("%Y")
     
     # eliminating the Year, if out of range
-    for year in years:
+    for year in years.split(","):
         if int(year) not in range(1993, int(current_year)+1): 
             logging.info("discarding " + str(year))
             years.remove(year)
@@ -47,7 +47,7 @@ def main():
     # Crawling the www.sec.gov to fetch the CIKs filed 10-K for the given years.
     secCrawler = SECCrawler()        
     cik_lists = []
-    for year in years:
+    for year in years.split(","):
         cik_list = secCrawler.get10kdata(str(year))
         cik_lists.append(cik_list.values.tolist()) 
 
