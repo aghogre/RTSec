@@ -24,8 +24,7 @@ class SECCrawler():
     # Srape and extract the companies having filed 10-K under www.sec.gov
     def get10kdata(self, year):
         df = []
-        archive_url = "https://www.sec.gov/Archives/edgar/full-index/"
-        + year + "/"
+        archive_url = "https://www.sec.gov/Archives/edgar/full-index/" + year + "/"
 
         r = requests.get(archive_url)
         soup = BeautifulSoup(r.content, "html.parser")
