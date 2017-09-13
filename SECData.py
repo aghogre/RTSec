@@ -38,8 +38,10 @@ def main():
     # extract current year to set the range for SEC crawling
     current_year = datetime.now().strftime("%Y")
     
+    years = years.split(",")
+    
     # eliminating the Year, if out of range
-    for year in years.split(","):
+    for year in years:
         if int(year) not in range(1993, int(current_year)+1): 
             logging.info("discarding " + str(year))
             years.remove(year)
@@ -47,22 +49,41 @@ def main():
     # Crawling the www.sec.gov to fetch the CIKs filed 10-K for the given years.
     secCrawler = SECCrawler()        
     cik_lists = []
-    for year in years.split(","):
+    for year in years:
         cik_list = secCrawler.get10kdata(str(year))
         cik_lists.append(cik_list.values.tolist()) 
 
     # Storing the 10-K complete data for each CIK in Azure and metadata in CKAN.
     secAzure = SEC_Azure(azure_account_name, azure_account_key, azure_container)
+    secCKAN = SEC_CKAN(ckan_host, ckan_api_key, azure_container, publisher)
+    
+    block_blob_service = BlockBlobService(account_name=azure_account_name, 		
+                                              account_key=azure_account_key)
     
     # fetch the Ticker data for the first time.
     # repeat the exercise if given years has current year or file not available
-    if str(current_year) in years or os.path.exists("ticker_metadata.json") == False:
-        makeMetadataJson(azure_container, publisher, azure_account_name, azure_account_key)
+    if str(current_year) in years:
+        makeMetadataJson(azure_container, publisher, azure_account_name, 
+                         azure_account_key)
+    else:
+        generator = block_blob_service.list_blobs(azure_container) 
+        for blob in generator:
+            if blob.name == 'ticker_metadata.json':
+                break
+        else:
+            makeMetadataJson(azure_container, publisher, azure_account_name, 
+                             azure_account_key)
         
-    secCKAN = SEC_CKAN(ckan_host, ckan_api_key, azure_container, publisher)
+    if not os.path.exists("ticker_metadata.json"):
+        block_blob_service.get_blob_to_path(azure_container, 
+                                            'ticker_metadata.json', 
+                                            'ticker_metadata.json')
+        
     for count in range(0, len(years)):
         count = store10kdata(str(years[count]), cik_lists[count], secAzure, secCKAN, 
                      azure_account_name, azure_account_key, azure_container)
+    
+    os.remove('ticker_metadata.json')
     
     # A confirmation message for extraction and storage of SEC 10-K filings 
     if count > 0:
@@ -110,12 +131,13 @@ def makeMetadataJson(azure_container, publisher, azure_account_name, azure_accou
     
     # writing the json formatted ticker metadata into a file for later use.
     block_blob_service = BlockBlobService(account_name=azure_account_name, 		
-                                          account_key=azure_account_key)		
-    
+                                              account_key=azure_account_key)
     with open("ticker_metadata.json", "w") as ticker_file:
         json.dump(metadata, ticker_file)
 
-    block_blob_service.create_blob_from_path(azure_container, 'ticker_metadata.json', 'ticker_metadata.json')		
+    block_blob_service.create_blob_from_path(azure_container, 
+                                             'ticker_metadata.json', 
+                                             'ticker_metadata.json')		
  
         
 # Delegates the core functionality to store the obtained SEC 10-k filings
@@ -163,7 +185,8 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
         #Creating upload files for each year in AZURE
         for blob in generator:
             if blob.name == filename:
-                block_blob_service.get_blob_to_path(azure_container, filename, filename)
+                block_blob_service.get_blob_to_path(azure_container, 
+                                                    filename, filename)
 
                 # make a copy of uploaded list file               
                 with open(filename, 'r') as fr2:
@@ -181,8 +204,6 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
         # shows the difference of already uploaded and yet to be uploaded ciks count
         logging.info("Among "+ str(len(cik_list)) + " files, " + str(len(uploaded_ciks_list)) + " are ignored.")
             
-        if not os.path.exists("ticker_metadata.json"):
-            block_blob_service.get_blob_to_path(azure_container, 'ticker_metadata.json', 'ticker_metadata.json')
         
         # fetch the remaining ciks 
         for cik in cik_list[len(uploaded_ciks_list):] :
@@ -200,7 +221,6 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
 
             logging.info("Download completed for cik -> " + str(cik[0]))
 
-        os.remove('ticker_metadata.json')
         count += 1
     except:
         logging.warn("No input file Found")
