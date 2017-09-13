@@ -12,4 +12,3 @@ WORKDIR /SECData
 RUN pip install -r requirements.txt
 
 CMD ["/bin/bash", "-c","source arguments.env && python SECData.py"]
-

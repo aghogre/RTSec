@@ -33,8 +33,7 @@ class SEC_Azure():
                 cik = '0' + cik
 
         # generate the url to crawl
-        base_url = "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=" + \
-            str(cik) + "&type=10-K&dateb=&owner=exclude&output=xml&start=0&count="
+        base_url = "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=" + str(cik) + "&type=10-K&dateb=&owner=exclude&output=xml&start=0&count="
         r = requests.get(base_url)
         data = r.text
 

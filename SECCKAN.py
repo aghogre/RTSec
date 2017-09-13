@@ -20,18 +20,15 @@ class SEC_CKAN():
         self.api_key = api_key
         self.azure_container = azure_container
         self.publisher = publisher
+        self.owner_org = "securities-exchange-commission"
 
         # Establishing connection with CKAN
         self.ckan_ckan = ckanapi.RemoteCKAN(ckan_host, apikey=api_key)
 
+
     # To save the metadata of CIKs downloaded into Azure.
-    def storeMetadata(
-            self,
-            cik,
-            azure_urls,
-            file_types,
-            year,
-            license_azure_url):
+    def storeMetadata(self, cik, azure_urls, file_types, year,
+                      license_azure_url):
         # read all metadata information from 'metadata.json'
         with open('ticker_metadata.json') as json_file:
             json_data = json_file.read()
@@ -54,8 +51,8 @@ class SEC_CKAN():
         description = ''
 
         # iterate the URLs of files stored in Azure to organize a dict of URLs.
-        multi_url_dict = {
-            'url' + str(i + 1): url for i, url in enumerate(azure_urls)}
+        multi_url_dict = {'url' + str(i + 1): url
+                          for i, url in enumerate(azure_urls)}
 
         # create or update the package for each artifact with latest Metadata
         # of Azure datasets.
@@ -81,7 +78,7 @@ class SEC_CKAN():
                 'cik': metadata["cik"],
                 'IRS Number': metadata["IRS Number"],
                 'Business': metadata["Business"],
-                'Incorporated': metadata["Incorporated"],
+                'Incorporated': metadata["Incorporated"]
             }
             description = metadata["Description"] + "\n\n"
         else:
@@ -114,60 +111,50 @@ class SEC_CKAN():
             self.createPackage(description, package_name, package_title, year,
                                tags, additional_fields)
         except ckanapi.ValidationError as ve:
-            if (ve.error_dict['__type'] == 'Validation Error'):
-                if('name' in ve.error_dict and
-                   ve.error_dict['name'] == ['That URL is already in use.']):
+            if(ve.error_dict['__type'] == 'Validation Error'):
+                if('name' in ve.error_dict
+                   and ve.error_dict['name'] == ['That URL is already in use.']):
                     try:
-                        # in case package already existed, attempting to update
-                        # the same.
-                        self.updatePackage(
-                            description,
-                            package_name,
-                            package_title,
-                            cik,
-                            year,
-                            tags,
-                            additional_fields)
+                        # Updating package if already existed,
+                        self.updatePackage(description, package_name,
+                                           package_title, cik, year, tags,
+                                           additional_fields)
                     except ckanapi.ValidationError as ve2:
-                        if('tags' in ve2.error_dict and
-                           len(ve2.error_dict['tags']) > 0):
-                            # in case any tags not supported due to special characters,
+                        if('tags' in ve2.error_dict
+                           and len(ve2.error_dict['tags']) > 0):
+                            # in case tags not supporting special characters,
                             # rebuilding the tags and updating the package
                             tags = self.rebuildTags(cik, year)
-                            self.updatePackage(
-                                description,
-                                package_name,
-                                package_title,
-                                cik,
-                                year,
-                                tags,
-                                additional_fields)
+                            self.updatePackage(description, package_name,
+                                               package_title, cik, year, tags,
+                                               additional_fields)
                         else:
                             raise
-                elif('tags' in ve.error_dict and
-                     len(ve.error_dict['tags']) > 0):
+                elif('tags' in ve.error_dict
+                     and len(ve.error_dict['tags']) > 0):
                     for e in ve.error_dict['tags']:
                         if "must be alphanumeric characters" in e:
                             try:
-                                # in case any tags not supported due to special characters,
+                                # if tags not supporting special characters,
                                 # rebuilding the tags and creating the package
                                 tags = self.rebuildTags(cik, year)
-                                self.createPackage(
-                                    description, package_name, package_title,
-                                    year, tags, additional_fields)
-                            except BaseException:
-                                # in case any tags not supported due to special characters,
+                                self.createPackage(description, package_name,
+                                                   package_title, year, tags,
+                                                   additional_fields)
+                            except:
+                                # if tags not supporting special characters,
                                 # rebuilding the tags and updating the package
                                 tags = self.rebuildTags(cik, year)
-                                self.updatePackage(
-                                    description, package_name, package_title,
-                                    cik, year, tags, additional_fields)
+                                self.updatePackage(description, package_name,
+                                                   package_title, cik, year,
+                                                   tags, additional_fields)
                 else:
                     raise
             else:
                 raise
-        except BaseException:
+        except:
             raise
+
 
     # creating package in CKAN
     def createPackage(self, description, package_name, package_title, year,
@@ -175,45 +162,38 @@ class SEC_CKAN():
         try:
             self.ckan_ckan.action.package_create(name=package_name,
                                                  title=package_title,
-                                                 owner_org="securities-exchange-commission",
+                                                 owner_org=self.owner_org,
                                                  notes=description,
                                                  maintainer=self.publisher,
                                                  version=year,
                                                  tags=tags,
                                                  extras=additional_fields,
                                                  )
-        except BaseException:
+        except:
             raise
 
+
     # creating package in CKAN
-    def updatePackage(
-            self,
-            description,
-            package_name,
-            package_title,
-            cik,
-            year,
-            tags,
-            additional_fields):
+    def updatePackage(self, description, package_name, package_title, cik,
+                      year, tags, additional_fields):
         try:
             self.ckan_ckan.action.package_update(id=package_name,
                                                  title=package_title,
-                                                 owner_org="securities-exchange-commission",
+                                                 owner_org=self.owner_org,
                                                  notes=description,
                                                  maintainer=self.publisher,
-                                                 version=self.getVersions(
-                                                     cik, year),
+                                                 version=self.getVersions(cik,
+                                                                         year),
                                                  tags=tags,
                                                  extras=additional_fields,
                                                  )
-        except BaseException:
+        except:
             raise
 
+
     def getVersions(self, cik, year):
-        request = urllib2.Request(
-            self.ckan_host +
-            "/api/rest/dataset/sec_" +
-            str(cik))
+        request = urllib2.Request(self.ckan_host + "/api/rest/dataset/sec_"
+                                  + str(cik))
         response = urllib2.urlopen(request)
         resp_json = json.loads(response.read())
 
@@ -234,9 +214,11 @@ class SEC_CKAN():
 
         return ",".join(valid_version)
 
+
     def rebuildTags(self, cik, year):
         tags = []
         tags.append({'name': "SEC"})
         tags.append({'name': str(cik)})
         tags.append({'name': str(year)})
         return tags
+
