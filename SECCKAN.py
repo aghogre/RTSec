@@ -14,13 +14,14 @@ from datetime import datetime
 
 class SEC_CKAN():
 
-    def __init__(self, ckan_host, api_key, azure_container, publisher):
+    def __init__(self, ckan_host, api_key, azure_container, publisher,
+                 owner_org):
         # initializing class variables
         self.ckan_host = ckan_host
         self.api_key = api_key
         self.azure_container = azure_container
         self.publisher = publisher
-        self.owner_org = "securities-exchange-commission"
+        self.owner_org = owner_org  # "securities-exchange-commission"
 
         # Establishing connection with CKAN
         self.ckan_ckan = ckanapi.RemoteCKAN(ckan_host, apikey=api_key)

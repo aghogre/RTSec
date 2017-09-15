@@ -40,6 +40,7 @@ def main():
     ckan_api_key = argument_config.get('ckan_key')
     years = argument_config.get('years')
     publisher = argument_config.get('publisher')
+    owner_org = argument_config.get('owner_org')
 
     # extract current year to set the range for SEC crawling
     current_year = datetime.now().strftime("%Y")
@@ -66,7 +67,8 @@ def main():
     secCKAN = SEC_CKAN(ckan_host,
                        ckan_api_key,
                        azure_container,
-                       publisher)
+                       publisher,
+                       owner_org)
 
     block_blob_service = BlockBlobService(account_name=azure_account_name,
                                           account_key=azure_account_key)
@@ -147,7 +149,7 @@ def makeMetadataJson(azure_container, publisher,
                 "Business": cik_data[6],
                 "Incorporated": cik_data[7],
                 "Tags": "SEC, " + cik_data[3] + "," + cik_data[4] + "," +
-                        cik_data[2]
+                        cik_data[2] + "," + cik_data[0] + "," + cik_data[6]
             })
         if len(resp_json['list']) < 100:
             break
