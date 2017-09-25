@@ -9,7 +9,9 @@ ADD . /TwitterStreaming
 
 WORKDIR /TwitterStreaming
 
-RUN /kafka-docker.sh
+ADD kafka-docker.sh /usr/local/bin/kafka-docker.sh
+
+CMD ["/usr/local/bin/kafka-docker.sh"]
 
 RUN pip install -r requirements.txt
 
