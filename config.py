@@ -26,6 +26,6 @@ argument_config = {
     'access_token': os.getenv('ACCESS_TOKEN', '140517807-YTwIXlHvEKIRKxxTLm0USi9rYzbi2DMfu8dFOCqa'),
     'access_token_secret': os.getenv('ACCESS_TOKEN_SECRET', 'Qp3pvMcVF9ka4AmhgeNHzN9k918X8ALqcXjOkXLQHY1no'),
     'twitter_hashtags': os.getenv('TWITTER_HASHTAGS', HASHTAGS),
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', 'localhost:9092'),
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9092'),
     'topic_name': os.getenv('KAFKA_TOPIC_NAME', 'twitter_stream'),
 }
