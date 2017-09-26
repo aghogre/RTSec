@@ -7,11 +7,18 @@ Created on Thu Sep 21 16:48:44 2017
 
 import os
 
-HASHTAGS = ["WSJ", "business", "Forbes", "FT", "Reuters", "nytimes",
-            "TheStreet", "TheEconomist", "WSJMarkets", "CNNMoney",
-            "MarketWatch", "YahooFinance", "jimcramer", "bySamRo",
-            "BrianSozzi", "TruthGundlach", "MarketFolly", "Carl_C_Icahn",
-            "ReformedBroker", "Northman Trader", "Samir_Madani"]
+HASHTAGS = ["business", "WSJ", "WSJMarkets", "Forbes", "TheEconomist", "FT",
+            "Reuters", "nytimes", "MarketFolly", "CNNMoney", "TheStreet",
+            "MarketWatch", "YahooFinance", "jimcramer", "TruthGundlach",
+            "Carl_C_Icahn", "ReformedBroker", "Schuldensuehner",
+            "LizAnnSonders", "NorthmanTrader", "Frances_Coppola", "bySamRo",
+            "BrianSozzi", "Wu_Tang_Finance", "TheStalwart", "RyanDetrick",
+            "zerohedge", "Amena_Bakr", "kitjuckes", "Benzinga",
+            "CiovaccoCapital", "JLyonsFundMGMT", "jasonzweigwsj",
+            "Samir_Madani", "Brenda_Kelly", "LiveSquawk", "vexmark",
+            "Sassy_SPY", "StockTwits", "KeithMcCullough", "FXCM", "JoelKruger",
+            "bespokeinvest", "IBDinvestors", "PaulKrugman", "JustinWolfers",
+            "jessefelder", "DailyFXTeam", "Ukarlewitz", "Stephanie_Link"]
 
 argument_config = {
     'consumer_key': os.getenv('CONSUMER_KEY', 'TjniEtqN8FumhX7BsnmN9GUhL'),
@@ -20,4 +27,5 @@ argument_config = {
     'access_token_secret': os.getenv('ACCESS_TOKEN_SECRET', 'Qp3pvMcVF9ka4AmhgeNHzN9k918X8ALqcXjOkXLQHY1no'),
     'twitter_hashtags': os.getenv('TWITTER_HASHTAGS', HASHTAGS),
     'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', 'localhost:9092'),
+    'topic_name': os.getenv('KAFKA_TOPIC_NAME', 'twitter_stream'),
 }
