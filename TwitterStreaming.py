@@ -14,7 +14,7 @@ import time
 import requests
 import re
 from config import argument_config
-from kafka import KafkaProducer
+from confluent_kafka import Producer
 from bs4 import BeautifulSoup
 
 
@@ -30,7 +30,7 @@ class TwitterStreamListener(tweepy.StreamListener):
         self.nightnight = 0
         self.topic_name = topic_name
         try:
-            self.producer = KafkaProducer(bootstrap_servers=[kafka_broker_uri])
+            self.producer = Producer({'bootstrap.servers': kafka_broker_uri})
         except:
             logging.error("Error while creating Kafka producer : ")
 
@@ -53,8 +53,10 @@ class TwitterStreamListener(tweepy.StreamListener):
             tweet[user_mention["screen_name"]] = json.dumps(json_resp)
 
             # Writing Tweet to Kafa Topics into producer
-            self.producer.send(self.topic_name, bytes(tweet))
+            self.producer.produce(topic=self.kafka_topic, value=json.dumps(response))  # for custom consumer
             self.producer.flush()
+            #self.producer.send(self.topic_name, bytes(tweet))
+            #self.producer.flush()
             logging.info("-- TWEET :: " + json_resp["text"])
 
     def on_error(self, status_code):
