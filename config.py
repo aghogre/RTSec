@@ -21,10 +21,10 @@ HASHTAGS = ["business", "WSJ", "WSJMarkets", "Forbes", "TheEconomist", "FT",
             "jessefelder", "DailyFXTeam", "Ukarlewitz", "Stephanie_Link"]
 
 argument_config = {
-    'consumer_key': os.getenv('CONSUMER_KEY', 'TjniEtqN8FumhX7BsnmN9GUhL'),
-    'consumer_secret': os.getenv('CONSUMER_SECRET', 'T62bKQcKgFlctabY63eTxQ0WlGc8GOV4AkvnMaAM87NRFw726m'),
-    'access_token': os.getenv('ACCESS_TOKEN', '140517807-YTwIXlHvEKIRKxxTLm0USi9rYzbi2DMfu8dFOCqa'),
-    'access_token_secret': os.getenv('ACCESS_TOKEN_SECRET', 'Qp3pvMcVF9ka4AmhgeNHzN9k918X8ALqcXjOkXLQHY1no'),
+    'consumer_key': os.getenv('CONSUMER_KEY', 'f6V9MManq18hH7KFSVSsbMSEU'),
+    'consumer_secret': os.getenv('CONSUMER_SECRET', '4dtVe6I0SyBDcG6XwCUU7mSeAVDRbRrGkToHOYOycxyd6mt8VN'),
+    'access_token': os.getenv('ACCESS_TOKEN', '912282441276055552-8ZR1KVdWtbNzlgHkQlPzQtYJqgGrOZd'),
+    'access_token_secret': os.getenv('ACCESS_TOKEN_SECRET', 'X2axJM3ETUfu2wEBjl2XWZ5Dr9yy5j3luwm4FkWWJFRun'),
     'twitter_hashtags': os.getenv('TWITTER_HASHTAGS', HASHTAGS),
     'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9092'),
     'topic_name': os.getenv('KAFKA_TOPIC_NAME', 'twitter_stream'),
