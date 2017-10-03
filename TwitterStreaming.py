@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 21 11:15:15 2017
-
-@author: ANSHUL
-"""
-
 import sys
 import math
 import logging
