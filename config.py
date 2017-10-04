@@ -25,14 +25,14 @@ argument_config = {
     'access_token': os.getenv('ACCESS_TOKEN', '912282441276055552-8ZR1KVdWtbNzlgHkQlPzQtYJqgGrOZd'),
     'access_token_secret': os.getenv('ACCESS_TOKEN_SECRET', 'X2axJM3ETUfu2wEBjl2XWZ5Dr9yy5j3luwm4FkWWJFRun'),
     'twitter_hashtags': os.getenv('TWITTER_HASHTAGS', HASHTAGS),
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', 'localhost:9092'),
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9092'),
     'kafka_topic': os.getenv('KAFKA_TOPIC', 'tweeter')
    
 }
 
 mongo_config = {
     'requires_auth': os.getenv('REQUIRES_AUTH', 'false'),
-    'mongo_uri': os.getenv('MONGO_URI', 'localhost:27017'),
+    'mongo_uri': os.getenv('MONGO_URI', '173.193.179.253:27017'),
     'mongo_username': os.getenv('MONGO_USER', ''),
     'mongo_password': os.getenv('MONGO_PASSWORD', ''),
     'mongo_auth_source': os.getenv('MONGO_AUTH_SOURCE', 'dbadmin'),
