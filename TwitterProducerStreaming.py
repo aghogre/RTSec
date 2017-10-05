@@ -113,7 +113,7 @@ if __name__ == '__main__':
     while True:
         try:
             # Initializing Streaming for the given Twitter Accounts
-            stream.filter(follow=twitter_hashtags.values)
+            stream.filter(follow=twitter_hashtags.values())
             logging.info("Twitter Streaming initiated...")
         except:
             continue
