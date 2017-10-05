@@ -57,7 +57,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             logging.info("-- TWEET :: " + json_resp["text"])
 
     def on_error(self, status_code):
-        print status_code
+        
         if status_code == 420:
             sleepy = 60 * math.pow(2, self.siesta)
             logging.warn("A reconnection attempt will occur in {0} minutes,\
