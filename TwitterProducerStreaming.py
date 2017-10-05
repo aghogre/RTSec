@@ -10,11 +10,8 @@ import logging
 import tweepy
 import json
 import time
-import requests
-import re
 from config import argument_config
 from kafka import KafkaProducer
-from bs4 import BeautifulSoup
 
 
 class TwitterStreamListener(tweepy.StreamListener):
@@ -78,24 +75,6 @@ class TwitterStreamListener(tweepy.StreamListener):
         return True
 
 
-def getTwitterIds(twitter_accounts):
-    """ Fetches the twitter Ids for the Twitter accounts based on Hashtags."""
-
-    twitter_ids = []
-    getIdUrl = "http://gettwitterid.com/?submit=GET+USER+ID&user_name={0}"
-
-    for ta in twitter_accounts:
-        r = requests.get(getIdUrl.format(ta))
-        soup = BeautifulSoup(r.content, "html.parser")
-        p_list = soup.find_all('p')
-        for p_val in p_list:
-            if 'Twitter User ID:' in p_val:
-                id_line = p_list[p_list.index(p_val)+1]
-                id_val = re.split('[< >]', str(id_line))[2]
-                twitter_ids.append(id_val)
-    return twitter_ids
-
-
 if __name__ == '__main__':
     """ Twitter Streaming program execution begins from here."""
 
@@ -104,6 +83,8 @@ if __name__ == '__main__':
                         %(module)s.%(funcName)s %(message)s',
                         level=logging.INFO)
 
+    twitter_hashtags = {}
+    
     # Collecting Authentication and other details from arguments.
     consumer_key = argument_config.get('consumer_key')
     consumer_secret = argument_config.get('consumer_secret')
@@ -117,12 +98,10 @@ if __name__ == '__main__':
     twitter_auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     twitter_auth.set_access_token(access_token, access_token_secret)
 
-    # Fetching Ids for Twitter accounts.
-    twitter_ids = getTwitterIds(twitter_hashtags)
-
     try:
         # Instantiating listener class.
-        listener = TwitterStreamListener(twitter_hashtags, twitter_ids,
+        listener = TwitterStreamListener(twitter_hashtags.keys,
+                                         twitter_hashtags.values,
                                          kafka_broker_uri, kafka_topic)
     except:
         logging.error("Error while creating Stream Listener : ")
@@ -134,7 +113,7 @@ if __name__ == '__main__':
     while True:
         try:
             # Initializing Streaming for the given Twitter Accounts
-            stream.filter(follow=twitter_ids)
+            stream.filter(follow=twitter_hashtags.values)
             logging.info("Twitter Streaming initiated...")
         except:
             continue
