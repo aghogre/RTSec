@@ -1,13 +1,8 @@
-FROM alpine:3.6
+FROM mongo:3.2.10
 
-RUN  apk add --no-cache --update bash && \
-     apk add python py-pip gcc python-dev build-base g++ musl-dev tar ca-certificates openssl && \
-     pip install --upgrade pip
+#create DB directory
+RUN mkdir -p /data/db
 
-ADD . /TWITTERSTREAMING
+EXPOSE 27017
 
-WORKDIR /TWITTERSTREAMING
-
-RUN pip install -r requirements.txt
-
-CMD ["/bin/bash", "-c", "source arguments.env && python TwitterProducerStreaming.py"]
+CMD ["mongod"]
