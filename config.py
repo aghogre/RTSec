@@ -40,5 +40,5 @@ mongo_config = {
     'db_name': os.getenv('MONGO_DB_NAME', 'CS'),
     'col_name': os.getenv('MONGO_COL_NAME', 'tweet1'),
     'mongo_index_name': os.getenv('MONGO_INDEX_NAME', 'tw'),
-    'ssl_required': os.getenv('MONGO_SSL_REQUIRED', False)
+    'ssl_required': os.getenv('MONGO_SSL_REQUIRED', 'false')
 }
