@@ -32,7 +32,7 @@ argument_config = {
 
 mongo_config = {
     'requires_auth': os.getenv('REQUIRES_AUTH', 'false'),
-    'mongo_uri': os.getenv('MONGO_URI', '127.0.0.1:27017'),
+    'mongo_uri': os.getenv('MONGO_URI', 'mongo-database'),
     'mongo_username': os.getenv('MONGO_USER', ''),
     'mongo_password': os.getenv('MONGO_PASSWORD', ''),
     'mongo_auth_source': os.getenv('MONGO_AUTH_SOURCE', 'dbadmin'),
