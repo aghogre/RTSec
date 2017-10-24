@@ -8,6 +8,8 @@ ADD . /FINANCIALNEWSDATA
 
 WORKDIR /FINANCIALNEWSDATA
 
+RUN apk add python-dev curl libxml2-dev libxslt-dev libffi-dev gcc musl-dev libgcc openssl-dev
+
 RUN pip install -r requirements.txt
 
 CMD ["/bin/bash", "-c", "source arguments.env && python FinancialDataProducer.py"]
