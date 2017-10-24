@@ -37,7 +37,11 @@ def make_mongo_connection(collection_name):
 
 def initialize_mongo(source):
     # Creating Mongo Collection
-    mongo_colln = make_mongo_connection(source)
+    try:
+        mongo_colln = make_mongo_connection(source)
+    except:
+        logging.error("Could not connect to Mongo Server")
+    return mongo_colln
     mongo_index_name = mongo_config.get('mongo_index_name')
     if mongo_index_name not in mongo_colln.index_information():
         mongo_colln.create_index(mongo_index_name, unique=False)
