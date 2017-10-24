@@ -1,0 +1,10 @@
+requests==2.18.4
+kafka==1.3.4.1
+bs4==0.0.1
+BeautifulSoup==3.2.1
+feedparser==5.2.1
+demjson==2.2.4
+finsymbols==1.3.0
+httplib2==0.10.3
+functools32==3.2.3.post2
+lxml==3.7.3
