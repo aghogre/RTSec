@@ -33,7 +33,7 @@ SOURCES = [
 
 
 argument_config = {
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', 'localhost:6667'),
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9097'),
     'kafka_topics': os.getenv('KAFKA_TOPICS', SOURCES)
 }
 
