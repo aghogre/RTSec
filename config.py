@@ -51,5 +51,5 @@ argument_config = {
     'rss_feed_urls': os.getenv('RSS_FEED_URLS', RSS_FEED_URLS),
     'site_map_urls': os.getenv('SITE_MAP_URLS', SITE_MAP_URLS),
     'scrapy_urls': os.getenv('SCRAPY_URLS', SCRAPY_URLS),
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9092'),
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9097'),
 }
