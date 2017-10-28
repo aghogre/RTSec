@@ -23,7 +23,10 @@ from requests.auth import HTTPBasicAuth
 from mongoDBConnection import initialize_mongo
 
 kafkaProducer = finKafkaProducer()
-mongo_colln = initialize_mongo()
+try:
+    mongo_colln = initialize_mongo()
+except:
+    logging.error("Error in connecting to Mongo")
 feed_count = {}
 
 
