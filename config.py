@@ -62,7 +62,7 @@ argument_config = {
     'scrapy_urls': os.getenv('SCRAPY_URLS', SCRAPY_URLS),
     'auth_urls': os.getenv('AUTH_URLS', AUTH_URLS),
     'ft_api_key': os.getenv('FT_API_KEY', '7hnme32uuvku4r9zp47kf5x9'),
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.253.179:253'),
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9097'),
 }
 
 mongo_config = {
