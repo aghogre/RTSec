@@ -25,9 +25,8 @@ def make_mongo_connection(collection_name):
     db_name = mongo_config.get('db_name')
 
     # Instantiating MongoClient
-    
     client = MongoClient(mongo_uri, ssl=ssl_required)
-    
+
     if requires_auth == 'true':
         client.the_database.authenticate(mongo_username,
                                          mongo_password,
@@ -36,31 +35,47 @@ def make_mongo_connection(collection_name):
                                          )
     db = client[db_name]
     col = db[collection_name]
-    
+
+    test_uuid = str(uuid1())
+    try:
+        col.insert_one({'uuid': test_uuid})
+        col.delete_one({'uuid': test_uuid})
+    except DuplicateKeyError:
+        logging.debug("Collection %s already exists" % collection_name)
+
     return col
 
 
 def initialize_mongo():
-    """Initializes MongoDB Connection
-    and returns MongoCollection with the given Index."""
+    """Initializes MongoDB Connection and returns MongoCollection for the
+    given Index."""
 
     mongo_index_name = mongo_config.get('mongo_index_name')
     source = mongo_config.get('col_name')
 
+    # Creating Mongo Collection
+    mongo_colln = make_mongo_connection(source)
     try:
-        # Creating Mongo Collection
-        mongo_colln = make_mongo_connection(source)
-
         # Create index, if it is not available.
         if mongo_index_name not in mongo_colln.index_information():
             mongo_colln.create_index(mongo_index_name, unique=False)
-
-        # data = mongo_colln.find()
-        
-        return mongo_colln
-    
     except IOError:
         logging.error("Could not connect to Mongo Server")
 
+    return mongo_colln
 
+
+def insert_into_mongo(mongo_colln, feed_object):
+    """To insert a news feed/post, given in JSON format, into MongoDB."""
+
+    try:
+        mongo_colln.insert_one(feed_object)
+        # mongo_colln.update(feed_object, upsert=True)
+    except:
+        raise
+        logging.error("Mongo Insert Exception.")
+    finally:
+        feed_object.clear
+
+    return True
 

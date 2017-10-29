@@ -11,6 +11,7 @@ from config import argument_config
 from kafka import KafkaProducer
 
 
+
 class finKafkaProducer():
     def __init__(self):
         logging.basicConfig(format='%(asctime)s %(levelname)s \
@@ -25,12 +26,13 @@ class finKafkaProducer():
         """Sends the message to the given Kafka topic."""
         data = {part_url: response}
         json_data = json.dumps(data)
-        
+
         try:
             # Kafka producer writing Post/Webpage content to Kafka Topics.
             self.producer.send(feedName, key=feedName,  # value=response)
                                value=json.loads(json_data))
             self.producer.flush()
             logging.info("-- FEED :: " + feedName)
-        except ValueError:
-            logging.info("Issue in kafka Producer for: " + feedName)
+        except:
+            logging.info("KafkaError in producer:: "+ feedName)
+        

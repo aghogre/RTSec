@@ -28,27 +28,17 @@ SITE_MAP_URLS = {
         "the_street": "https://www.thestreet.com/robots.txt",
         "msci_dataset": "https://www.msci.com/robots.txt",
         "ceic_dataset": "https://www.ceicdata.com/robots.txt",
-
-        # SITEMAPS FOR HISTORICAL RSS 
-        #"wall_street_journal": "https://www.wsj.com/robots.txt",
-        #"cnbc": "https://www.cnbc.com/robots.txt",
-        #"cnn_money": "http://money.cnn.com/robots.txt",
-        #"rtt_news": "http://www.rttnews.com/robots.txt",
-        #"seeking_alpha": "https://seekingalpha.com/robots.txt",
-        #"zacks_investment": "https://www.zacks.com/robots.txt",
-        
-        #"motley_fool": "http://culture.fool.com/robots.txt",
         }
 
-AUTH_URLS = {
-        "financial-times": {
-                "auth_id": "vavasarala@randomtrees.com",
-                "auth_pwd": "welcome123"
-                },
-        "the-wall-street-journal": {
-                "auth_id": "vavasarala@randomtrees.com",
-                "auth_pwd": "welcome123"
-                },
+HISTORICAL_SITEMAP_URLS = {
+        "wall_street_journal": "https://www.wsj.com/robots.txt",
+        "cnbc": "https://www.cnbc.com/robots.txt",
+        "cnn_money": "http://money.cnn.com/robots.txt",
+        "rtt_news": "http://www.rttnews.com/robots.txt",
+        "seeking_alpha": "https://seekingalpha.com/robots.txt",
+        "zacks_investment": "https://www.zacks.com/robots.txt",
+        
+        #"motley_fool": "http://culture.fool.com/robots.txt",
         }
 
 SCRAPY_URLS = {
@@ -57,12 +47,18 @@ SCRAPY_URLS = {
 
 
 argument_config = {
+    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9097'),
+
     'rss_feed_urls': os.getenv('RSS_FEED_URLS', RSS_FEED_URLS),
     'site_map_urls': os.getenv('SITE_MAP_URLS', SITE_MAP_URLS),
     'scrapy_urls': os.getenv('SCRAPY_URLS', SCRAPY_URLS),
-    'auth_urls': os.getenv('AUTH_URLS', AUTH_URLS),
+    'historical_urls': os.getenv('HISTORICAL_URLS', HISTORICAL_SITEMAP_URLS),
+
     'ft_api_key': os.getenv('FT_API_KEY', '7hnme32uuvku4r9zp47kf5x9'),
-    'kafka_broker_uri': os.getenv('KAFKA_BROKER_URI', '173.193.179.253:9097'),
+    'ft_api_id': os.getenv('FT_AUTH_ID', 'vavasarala@randomtrees.com'),
+    'ft_api_pwd': os.getenv('FT_AUTH_PWD', 'welcome123'),
+    'wsj_auth_id': os.getenv('WSJ_AUTH_ID', 'vavasarala@randomtrees.com'),
+    'wsj_auth_pwd': os.getenv('WSJ_AUTH_PWD', 'welcome123'),
 }
 
 mongo_config = {
@@ -74,8 +70,7 @@ mongo_config = {
     'mongo_auth_source': os.getenv('MONGO_AUTH_SOURCE', 'dbadmin'),
     'mongo_auth_mechanism': os.getenv('MONGO_AUTH_MECHANISM', 'MONGODB-CR'),
     # db_name needs to be same as consumer code, for checking duplicates.
-    'db_name': os.getenv('MONGO_DB_NAME', 'fin'),
+    'db_name': os.getenv('MONGO_DB_NAME', 'fin1'),
     'col_name': os.getenv('MONGO_COL_NAME', 'METADATA'),
     'mongo_index_name': os.getenv('MONGO_INDEX_NAME', 'csrt'),
 }
-
