@@ -5,3 +5,4 @@ bs4==0.0.1
 ckanapi==4.0
 BeautifulSoup==3.2.1
 pandas==0.19.2
+pymongo==3.5.1
