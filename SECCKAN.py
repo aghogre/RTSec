@@ -68,7 +68,7 @@ class SEC_CKAN():
                                                  )
         
         # Establishing Mongo collection
-        self.mongo_colln = initialize_mongo()
+        self.mongo_colln = initialize_mongo(mongo_config.get('col_name'))
 
 
     # To save the metadata of CIKs downloaded into Azure.
