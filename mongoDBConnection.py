@@ -25,9 +25,8 @@ def make_mongo_connection(collection_name):
     db_name = mongo_config.get('db_name')
 
     # Instantiating MongoClient
-    
     client = MongoClient(mongo_uri, ssl=ssl_required)
-    
+
     if requires_auth == 'true':
         client.the_database.authenticate(mongo_username,
                                          mongo_password,
@@ -35,22 +34,26 @@ def make_mongo_connection(collection_name):
                                          mechanism=mongo_auth_mechanism
                                          )
     db = client[db_name]
-    col = db[collection_name]
-    
-    # The code below is to ensure that the collection exists, and can therefore have an index created on it
+    mongo_colln = db[collection_name]
+
+    # Testing Index with Unique element, to avoid failure of Index creation,
+    # in case of Collection doesnot exist.
     test_uuid = str(uuid1())
-    col.insert_one({'uuid': test_uuid})
-    col.delete_one({'uuid': test_uuid})
-    
-    return col
+    try:
+        mongo_colln.insert_one({'uuid': test_uuid})
+        mongo_colln.delete_one({'uuid': test_uuid})
+    except:
+        logging.debug("Collection %s already exists" % collection_name)
+
+    return mongo_colln
 
 
-def initialize_mongo():
+def initialize_mongo(source):
     """Initializes MongoDB Connection
     and returns MongoCollection with the given Index."""
 
     mongo_index_name = mongo_config.get('mongo_index_name')
-    source = mongo_config.get('col_name')
+    #source = mongo_config.get('col_name')
 
     try:
         # Creating Mongo Collection
@@ -60,10 +63,30 @@ def initialize_mongo():
         if mongo_index_name not in mongo_colln.index_information():
             mongo_colln.create_index(mongo_index_name, unique=False)
 
-        return mongo_colln
-    
     except IOError:
         logging.error("Could not connect to Mongo Server")
 
+    return mongo_colln
 
 
+def insert_into_mongo(mongo_colln, feed_object):
+    """To insert given JSON data into MongoDB."""
+    try:
+        mongo_colln.insert_one(feed_object)
+    except:
+        raise
+        logging.error("Mongo Insert Exception.")
+    finally:
+        feed_object.clear
+    return True
+
+
+def update_mongo_collection(mongo_colln, mongo_id, feed_object):
+    """To update existing JSON data into MongoDB."""
+    try:
+        mongo_colln.update_one({'_id': mongo_id}, {"$set": feed_object},
+                               upsert=True)
+    except:
+        logging.error("Mongo Update Exception.")
+    finally:
+        feed_object.clear

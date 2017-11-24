@@ -57,7 +57,15 @@ class SEC_CKAN():
                                                  )
             logging.info("Created CKAN for SEC data")
         except:
-            pass
+            self.ckan_ckan.action.package_update(id="sec_data1",
+                                                 title="SEC Data",
+                                                 owner_org=self.owner_org,
+                                                 notes="SEC 10-K filings",
+                                                 maintainer=self.publisher,
+                                                 tags=[{'name': "SEC"},
+                                                       {'name': "10K"}],
+                                                 extras=additional_fields,
+                                                 )
         
         # Establishing Mongo collection
         self.mongo_colln = initialize_mongo()

@@ -18,6 +18,8 @@ from SECCrawl import SECCrawler
 from SECAzure import SEC_Azure
 from SECCKAN import SEC_CKAN
 from azure.storage.blob import AppendBlobService, BlockBlobService
+from config import mongo_config
+from mongoDBConnection import initialize_mongo, insert_into_mongo, update_mongo_collection
 
 
 license_url = "https://www.sec.gov/spotlight/xbrl/xbrlviewerlicense.htm"
@@ -174,11 +176,6 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
         count = 0
         uploaded_ciks_list = []
 
-        # make a file to maintain a list of uploaded ciks list of data.
-        filename = "uploaded_data_"+year+".txt"
-
-        append_blob_service = AppendBlobService(account_name=azure_acc_name,
-                                                account_key=azure_acc_key)
         block_blob_service = BlockBlobService(account_name=azure_acc_name,
                                               account_key=azure_acc_key)
 
@@ -208,29 +205,17 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
                                     azure_container,
                                     path.join('License', licensefile))
 
-        # Creating upload files for each year in AZURE
-        for blob in generator:
-            if blob.name == filename:
-                block_blob_service.get_blob_to_path(azure_container,
-                                                    filename,
-                                                    filename)
-
-                # make a copy of uploaded list file
-                with open(filename, 'r') as fr2:
-                    uploaded_ciks_list = map(str.strip, fr2)
-                os.remove(filename)
-
-                # flag the availability of file
-                count += 1
+        # Fetching the list of Uploaded CIKs from MongoDB.
+        mongo_colln = initialize_mongo("UPLOADED_CIKS")
+        metadata_cursor = mongo_colln.find({})
+        mongo_id = ''
+        for i in metadata_cursor:
+            mongo_id = i["_id"]
+            if year in i:
+                uploaded_ciks_list = i[year]
                 break
 
-        # create the file in azure to maintain the uploaded ciks list,
-        # iff not present
-        if count == 0:
-            append_blob_service.create_blob(azure_container, filename)
-
-        # shows the difference of already uploaded
-        # and yet to be uploaded ciks count
+        # shows the difference of uploaded and yet to be uploaded ciks count
         logging.info("Among " + str(len(cik_list)) + " files, " +
                      str(len(uploaded_ciks_list)) + " are ignored.")
 
@@ -246,9 +231,9 @@ def store10kdata(year, cik_list, secAzure, secCKAN,
             secCKAN.storeMetadata(cik[0], azure_url, file_types, year,
                                   license_azure_url)
 
-            # update the file with extrated cik in the list
-            append_blob_service.append_blob_from_text(azure_container,
-                                                      filename, cik[0]+'\n')
+            uploaded_ciks_list.append(cik)
+            update_mongo_collection(mongo_colln, mongo_id,
+                                    {year: uploaded_ciks_list})
 
             logging.info("Download completed for cik -> " + str(cik[0]))
 
