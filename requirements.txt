@@ -1,0 +1,7 @@
+requests==2.5.3
+confluent-kafka==0.9.4
+tweepy==3.5.0
+bs4==0.0.1
+BeautifulSoup==3.2.1
+
+
