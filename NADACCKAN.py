@@ -27,6 +27,7 @@ def insert_into_ckan(mongo_uri, description):
     db_name = mongo_config.get('db_name')
     collection_name = mongo_config.get('col_name')
     source = 'NADAC'
+    License = 'https://www.usa.gov/government-works'
     ckan_ckan = ckanapi.RemoteCKAN(ckan_host, apikey=api_key)
 
     package_name = source.lower().replace("_", "-")\
@@ -53,6 +54,7 @@ def insert_into_ckan(mongo_uri, description):
             'Database name': db_name,
             'Collection': collection_name,
             'Description': description,
+            'License': License,
             }
     additional_fields = []
     for k, v in dict_additional_fields.items():
