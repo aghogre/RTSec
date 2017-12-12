@@ -10,7 +10,7 @@ SODAPY API - API details can be found on https://dev.socrata.com/docs/endpoints.
 
 ## Data Storing
 
-A collection is maintained for all datasets in the MongoDB. A Metadata collection helps maintain a record of what all datasets have been downloaded. The MongoDB host URI can be maintained in the CKAN. Last updated time helps in identifying when the program was executed latest.
+A collection is maintained for all datasets in the MongoDB. A Metadata collection helps maintain a record of what all datasets have been downloaded. The MongoDB host URI can be maintained in the CKAN along with License details of datasets. Last updated time helps in identifying when the program was executed latest.
 
 Below are the list of arguments to be part of the execution.
 
