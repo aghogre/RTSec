@@ -7,7 +7,7 @@ import os
 
 argument_config = {
         'ckan_host': os.getenv('CKAN_HOST', 'http://40.71.214.191:80'),
-        'api_key': os.getenv('CKAN_API_KEY', '3474fcd0-2ebc-4036-a60a-8bf77eea161f'),
+        'api_key': os.getenv('CKAN_API_KEY', '8613bf84-7b92-40f3-aa08-056c5f65421b'),
         'publisher': os.getenv('PUBLISHER', 'random trees'),
         'owner_org': os.getenv('OWNER_ORG', 'securities-exchange-commission'),
         'ckan_private': os.getenv('CKAN_PRIVATE', False)
