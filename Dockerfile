@@ -1,4 +1,4 @@
-FROM continuumio/anaconda:4.0.7
+FROM continuumio/anaconda:4.3.14
 
 ADD . /SQL-DBMigration
 
