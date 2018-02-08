@@ -1,17 +1,16 @@
-name: cortex/detect_faces
-title: Detect Faces
-description: Detects faces within an image that is provided as input.
-
+name: cortex/bing-autosuggest
+title: bing-autosuggest
+description: suggest queries related details in entered for search text.
 properties:
   -
     name: model
     title: Model
-    description: Detects faces within an image that is provided as input.
+    description: suggest queries related details in entered for search.
     required: true
     type: Enum
-    defaultValue: AWS
+    defaultValue: Microsoft
     validValues:
-      - AWS
+      - Microsoft
   -
     name: api_key
     title: API Key
@@ -20,22 +19,22 @@ properties:
     type: String
 inputs:
   -
-    name: image
-    typeName: cortex/Image
+    name: text
+    typeName: cortex/bing-autosuggest
     routing:
       property: model
       default:
-        functionID: cortex/detect_faces
+        functionID: cortex/bing-autosuggest
         output: analysis
       rules:
         -
-          match: AWS
-          functionID: cortex/detect_faces
+          match: Microsoft
+          functionID: cortex/bing_autosuggest
           output: analysis
 outputs:
   -
     name: analysis
-    typeName: cortex/DetectFacesResponse
+    typeName: cortex/BingAutoSuggestResponse
 tags:
   -
     label: Cloud
@@ -44,5 +43,5 @@ tags:
     label: Deep Learning
     value: skill.machine_learning_style.deep_learning
   -
-    label: Image
-    value: skill.cognitive_function.image
+    label: Vision
+    value: skill.cognitive_function.vision
