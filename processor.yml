@@ -1,6 +1,8 @@
 name: cortex/detect_faces
 title: Detect Faces
 description: Detects faces within an image that is provided as input.
+
+properties:
   -
     name: model
     title: Model
