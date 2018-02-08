@@ -1,0 +1,46 @@
+name: cortex/detect_faces
+title: Detect Faces
+description: Detects faces within an image that is provided as input.
+  -
+    name: model
+    title: Model
+    description: Detects faces within an image that is provided as input.
+    required: true
+    type: Enum
+    defaultValue: AWS
+    validValues:
+      - AWS
+  -
+    name: api_key
+    title: API Key
+    description: API Key
+    required: true
+    type: String
+inputs:
+  -
+    name: image
+    typeName: cortex/Image
+    routing:
+      property: model
+      default:
+        functionID: cortex/detect_faces
+        output: analysis
+      rules:
+        -
+          match: AWS
+          functionID: cortex/detect_faces
+          output: analysis
+outputs:
+  -
+    name: analysis
+    typeName: cortex/DetectFacesResponse
+tags:
+  -
+    label: Cloud
+    value: skill.deployment.cloud
+  -
+    label: Deep Learning
+    value: skill.machine_learning_style.deep_learning
+  -
+    label: Image
+    value: skill.cognitive_function.image
