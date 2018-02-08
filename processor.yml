@@ -1,0 +1,47 @@
+name: cortex/bing-autosuggest
+title: bing-autosuggest
+description: suggest queries related details in entered for search text.
+properties:
+  -
+    name: model
+    title: Model
+    description: suggest queries related details in entered for search.
+    required: true
+    type: Enum
+    defaultValue: Microsoft
+    validValues:
+      - Microsoft
+  -
+    name: api_key
+    title: API Key
+    description: API Key
+    required: true
+    type: String
+inputs:
+  -
+    name: text
+    typeName: cortex/bing-autosuggest
+    routing:
+      property: model
+      default:
+        functionID: cortex/bing-autosuggest
+        output: analysis
+      rules:
+        -
+          match: Microsoft
+          functionID: cortex/bing_autosuggest
+          output: analysis
+outputs:
+  -
+    name: analysis
+    typeName: cortex/BingAutoSuggestResponse
+tags:
+  -
+    label: Cloud
+    value: skill.deployment.cloud
+  -
+    label: Deep Learning
+    value: skill.machine_learning_style.deep_learning
+  -
+    label: Vision
+    value: skill.cognitive_function.vision
