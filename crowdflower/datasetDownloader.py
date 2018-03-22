@@ -46,7 +46,7 @@ def main():
                 if name  and original_url:
                     print original_url
                     print name
-                    filename = name.split(".")[0].replace("(", "").replace(")", "").replace("-", "").replace(":", "").replace(" ", "")
+                    filename = name.split(".")[0].replace("(", "").replace(")", "").replace("-", "").replace(":", "").replace(" ", "").replace("/", "").replace("'", "").replace("?", "").replace('"', "").replace(",", "").replace("`", "")
                    
                     if original_url.split(".")[-1] == 'csv':
                         response = requests.get(original_url)
@@ -69,8 +69,8 @@ def csv_to_dict(filename):
     mongo = mongodbConnector()
     mongo_colln = mongo.initialize_mongo(filename)
     try:
-        file = open(filename+'.csv', 'r')
-        reader = csv.DictReader(file) 
+        file = open(filename+'.csv', 'rU')
+        reader = csv.DictReader(file, dialect=csv.excel) 
         i=0
         for row in reader:
             for k in row.keys():
@@ -88,7 +88,7 @@ def csv_to_dict(filename):
                 #os.remove(filename+'.csv')
                 break
     except:
-            pass
+            raise
 
            
                 
