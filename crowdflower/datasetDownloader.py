@@ -8,7 +8,7 @@ Created on Mon Mar 19 16:24:51 2018
 
 import requests
 from bs4 import BeautifulSoup
-from MongodbConnector import mongodbConnector
+from mongodbConnector import mongodbConnector
 from config import mongo_config
 import logging
 from datetime import datetime
