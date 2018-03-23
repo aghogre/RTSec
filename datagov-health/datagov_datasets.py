@@ -9,6 +9,7 @@ import requests
 import json
 import urllib2
 import os.path
+import pandas as pd
 import csv
 from config import argument_config, mongo_config
 from MongodbConnector import mongodbConnector
@@ -64,7 +65,7 @@ def extractFromJSON(domain, datasets_colln):
             
             file_name = (dataset_name + "_" + (res["name"]).replace(" ", "")
                         + "." + res_format).lower()
-            print file_name
+            #print file_name
             
             try:
                 if not os.path.isfile(file_name):
@@ -75,26 +76,29 @@ def extractFromJSON(domain, datasets_colln):
                     with open(file_name, 'wb') as res_file:
                         res_file.write(resp_content)
         
-                print "READING..." + res_format
-                
                 if res_format == "JSON" or res_format == "json":
                     try:
                         with open(file_name, "r") as res_file_r:
-                            #data_documents.extend(json.load(res_file_r))
-                            mongo.bulk_mongo_insert(data_colln, json.load(res_file_r))
+                            data_documents.append(json.load(res_file_r))
+                            print res_format + " :: " + file_name + " :: " \
+                                  + dataset_name + " :: " + str(len(data_documents))
+                            mongo.bulk_mongo_insert(data_colln, data_documents)
+                            
                     except:
-                        continue
+                        raise
 
                 elif res_format == "CSV" or res_format == "csv":
                     
                     file = open(file_name, 'rU')
                     reader = csv.DictReader(file, dialect=csv.excel) 
                     for row in reader:
-                        data_documents.extend(row)
+                        data_documents.append(row)
                     try:
                         mongo.bulk_mongo_insert(data_colln, data_documents)
+                        print res_format + " :: " + file_name + " :: " \
+                                    + str(len(data_documents)) 
                     except:
-                        continue
+                        raise
                     
                     """
                     converted_file_name = file_name.replace(".csv", "_converted.json")
@@ -133,7 +137,7 @@ def main():
     datasets_colln = mongo.initialize_mongo(datasets_colln_name)
         
     for d in domains:
-        fetchGovData(d, 100, datasets_colln)
+        #fetchGovData(d, 100, datasets_colln)
 
         extractFromJSON(d, datasets_colln)
 
