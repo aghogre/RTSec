@@ -42,11 +42,7 @@ def fetchGovData(domain, dataset_count, datasets_colln):
 
 
 def extractFromJSON(domain, datasets_colln):
-    """with open(domain + ".json", 'r') as dfile_r:
-        d_data = json.load(dfile_r)
-        datalist = []
-        for d in d_data['result']['results']:
-            data = {}"""
+    
     
     datasets_cursor = datasets_colln.find()
     for dataset in datasets_cursor:
@@ -99,8 +95,18 @@ def extractFromJSON(domain, datasets_colln):
                                     + str(len(data_documents)) 
                     except:
                         raise
+                
+                """else:
+                    with open(file_name, 'rU') as f:
+                        data = f.read()
+                    json_object = {"Data": data}
+                    try:
+                            mongo.bulk_mongo_insert(data_colln, json_object)
+                            print res_format + " :: " + file_name + " :: " \
+                                        + str(len(data_documents)) 
+                    except:
+                        pass
                     
-                    """
                     converted_file_name = file_name.replace(".csv", "_converted.json")
                     if not os.path.isfile(converted_file_name):
                         csv_file = pd.DataFrame(pd.read_csv(file_name,
@@ -137,7 +143,7 @@ def main():
     datasets_colln = mongo.initialize_mongo(datasets_colln_name)
         
     for d in domains:
-        #fetchGovData(d, 100, datasets_colln)
+        fetchGovData(d, 800, datasets_colln)
 
         extractFromJSON(d, datasets_colln)
 
